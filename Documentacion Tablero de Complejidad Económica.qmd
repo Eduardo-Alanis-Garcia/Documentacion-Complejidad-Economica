@@ -1,5 +1,5 @@
 ---
-title: "Documentacion Tablero de Complejidad Económica"
+title: "Documentación Tablero de Complejidad Económica"
 author: "Eduardo Alanis Garcia"
 format: html
 editor: visual
@@ -71,23 +71,326 @@ Por otro lado, cuando es a **nivel nacional** dentro de la página del DENUE uti
 
 Añadimos todos los archivos descargados a esa carpeta.
 
-![](Img/Descarga Nacional Carpeta.PNG)
+![](Img/Descarga%20Nacional%20Carpeta.PNG)
 
-![](Img/Descarga Nacional Todos.PNG)
+![](Img/Descarga%20Nacional%20Todos.PNG)
 
-#### Con los archivos descargados toca descomprimirlos
+#### Descomprimir archivos
+
+Descomprime los archivos de **Hidalgo**. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.
+
+```{r descomprimir_hidalgo}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_zip = list.files(path = directorio, recursive = TRUE, full.names = TRUE, pattern = "\\.zip")
+
+for (zip_file in archivos_zip) {
+  
+  nombre_carpeta = tools::file_path_sans_ext(basename(zip_file))
+  
+  # Carpeta destino 
+  destino = file.path(dirname(zip_file), nombre_carpeta)
+  
+  # Crear carpeta si no existe
+  if (!dir.exists(destino)) {
+    dir.create(destino, recursive = TRUE)
+  }
+  
+  # Extraer dentro de la carpeta
+  unzip(zip_file, exdir = destino)
+  
+  message("Extraído: ", zip_file, " → ", destino)
+}
+```
+
+![](Img/Descomprimir_Hidalgo.png)
+
+De manera analoga los archivos **nivel nacional**. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.
+
+```{r descomprimir_nacional}
+directorio = "Datos/Originales/Nacional/2025A"
+archivos_zip = list.files(path = directorio, recursive = TRUE, full.names = TRUE, pattern = "\\.zip")
+
+for (zip_file in archivos_zip) {
+  
+  nombre_carpeta = tools::file_path_sans_ext(basename(zip_file))
+  
+  # Carpeta destino 
+  destino = file.path(dirname(zip_file), nombre_carpeta)
+  
+  # Crear carpeta si no existe
+  if (!dir.exists(destino)) {
+    dir.create(destino, recursive = TRUE)
+  }
+  
+  # Extraer dentro de la carpeta
+  unzip(zip_file, exdir = destino)
+  
+  message("Extraído: ", zip_file, " → ", destino)
+}
+```
+
+![](Img/Descomprimir_nacional.png)
 
 ## Índice de Complejidad Económica
 
 El Índice de Complejidad Económica (ECI) es una medida de las habilidades y capacidades técnicas implícitas con las que cuenta una región, el cual captura qué tan compleja es una economía identificando tanto las actividades que puede desarrollar con éxito como en qué otros lugares están presentes esas actividades. Una región con un ECI alto indica que las actividades realizadas en la región requieren capacidades técnicas y habilidades más especializadas. El ECI se calculó con una estimación del número de trabajadores en cada industria y el número de unidades económicas dedicadas a cada industria.
 
--   Content authored with markdown
--   Output from executable code
+![](Img/ICE_Vista_General.png)
 
-## Code
+El siguiente **código** muestra cómo **calcular el ECI** de dos formas:
 
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+1.  Usando la estimación de **personal de trabajadores** por industria.
 
-```{r}
-1 + 1
+2.  Usando el número de **unidades económicas.**
+
+No se explicará en detalle cómo funciona el código.
+
+```{r ECI_archivo}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_csv = list.files(path = directorio, 
+                          pattern = ".csv", 
+                          all.files = T, 
+                          recursive = T, 
+                          full.names = T)
+
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+nombres = archivos_csv |>  dirname() |>  dirname() |>  basename()
+
+cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
+cat("El archivo csv tiene el nombre: ", nombres, "\n")
+```
+
+Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
+
+```{r ECI}
+#| message: false
+#| warning: false
+i = 1
+denue = read.csv(archivos_csv[i]) |> 
+  dplyr::filter(cve_ent == 13)
+
+####################
+### ICE Personal ###
+####################
+
+denue_P = denue  |> 
+  dplyr::mutate(per_ocu = dplyr::case_when(
+    per_ocu == "0 a 5 personas" ~ "2.5",
+    per_ocu == "6 a 10 personas" ~ "8",
+    per_ocu == "11 a 30 personas" ~ "20.5",
+    per_ocu == "31 a 50 personas" ~ "40.5",
+    per_ocu == "51 a 100 personas" ~ "75.5",
+    per_ocu == "101 a 250 personas" ~ "175.5",
+    per_ocu %in% c("251 y más personas", "251 y m\xe1s personas") ~ "251",
+    TRUE ~ per_ocu  
+  ),
+  per_ocu = as.numeric(per_ocu),
+  cvegeo = paste0("13", sprintf("%03d", cve_mun))) |> 
+  dplyr::group_by(cvegeo, codigo_act) |> 
+  dplyr::summarise(suma_per_ocu = sum(per_ocu, na.rm = T))
+
+
+balassa_P = economiccomplexity::balassa_index(trade_data = denue_P, country = "cvegeo", product = "codigo_act", value = "suma_per_ocu")
+complejidad_P = economiccomplexity::complexity_measures(
+  balassa_index = balassa_P,
+  method = "eigenvalues"
+)
+
+
+ICE_P = data.frame(
+  names(complejidad_P$complexity_index_country),
+  complejidad_P$complexity_index_country
+)
+
+names(ICE_P) = c("CVEGEO", paste0("ICE_Personal_", nombres[i]))
+
+
+
+####################
+### ICE UNIDADES ###
+####################
+
+denue_U = denue  |> 
+  dplyr::mutate(cvegeo = paste0("13", sprintf("%03d", cve_mun))) |> 
+  dplyr::group_by(cvegeo, codigo_act) |> 
+  dplyr::summarise(suma_unidades = dplyr::n()) |>  
+  dplyr::ungroup() 
+
+
+complejidad_U = economiccomplexity::complexity_measures(
+  balassa_index = economiccomplexity::balassa_index(trade_data = denue_U, country = "cvegeo", product = "codigo_act", value = "suma_unidades"),
+  method = "eigenvalues"
+)
+
+ICE_U = data.frame(
+  names(complejidad_U$complexity_index_country),
+  complejidad_U$complexity_index_country
+)
+
+names(ICE_U) = c("CVEGEO", paste0("ICE_Unidades_", nombres[i]))
+
+
+ICE = merge(x = ICE_P, y = ICE_U, by = "CVEGEO", all.x = T)
+
+ICE |>  head()
+```
+
+El resultado debe ser un **data.frame** con 3 columnas:
+
+-   **CVEGEO**
+
+-   **ICE_Personal_2025A**
+
+-   **ICE_Unidades_2025A**
+
+*Nota: El nombre de las columnas depende del periodo que descargaste. Por ejemplo:*
+
+-   *Si descargaste **2025A** se llamarán ICE_Personal_2025A y ICE_Unidades_2025A.*
+
+-   *Si fuera **2025B**, entonces serían ICE_Personal_2025B y ICE_Unidades_2025B.*
+
+Como es una **actualización del tablero**, necesitas tener antes los **Índices de Complejidad Económica** previos, que en este caso están en el archivo **estatal.csv.** El archivo se visualiza asi:
+
+![](Img/ICE_Captura_archivo.png)
+
+Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
+
+```{r ECI_previos}
+ICE_previo = read.csv("Datos/Procesados/Antiguos/estatal.csv")
+personal_previo = names(ICE_previo) |>  grep(pattern = "ICE_Personal", value = T)
+personal_previo = personal_previo[length(personal_previo)]  
+unidades_previo = names(ICE_previo) |>  grep(pattern = "ICE_Unidades", value = T)
+unidades_previo = unidades_previo[length(unidades_previo)]
+
+cat("El ultimo realizado ICE Personal es: ", personal_previo, "\n")
+cat("El ultimo realizado ICE Unidades es: ", unidades_previo, "\n")
+```
+
+***Nota:** Aqui en la linea de codigo donde se encuentran los **dplyr::relocate** si debes modificar manualmente los nombres de las columnas.*
+
+```{r ECI_guardar}
+
+ICE_actualizado = merge(x = ICE_previo, y = ICE, by = "CVEGEO")
+ICE_actualizado = ICE_actualizado |> 
+  dplyr::relocate(ICE_Personal_2025A, .after = ICE_Personal_2024B) |> 
+  dplyr::relocate(ICE_Unidades_2025A, .after = ICE_Unidades_2024B)
+
+
+write.csv(ICE_actualizado, "Datos/Procesados/Actualizados/estatal.csv", row.names = F, fileEncoding = "UTF-8")
+```
+
+## Afinidad y Complejidad del producto.
+
+PENDIENTE PORQUE ES EL QUE CONSUME MAS RECURSOS Y MAS TARDADO.
+
+![](Img/Afinidad_Complejidad_Vista_General.png)
+
+## Diversidad y Ubicuidad promedio.
+
+-   **Diversidad** indica el número de actividades económicas en las que está especializada cada entidad.
+
+-   **Ubicuidad** indica cuántas entidades están especializadas en cada actividad económica.
+
+Las entidades **peor posicionadas** están en el **primer cuadrante** (superior derecha), donde muestran baja diversidad y alta ubicuidad. En contraste, las entidades que se **posicionan mejor** se encuentran en el **cuarto cuadrante** (inferior derecha), caracterizado por alta diversificación y baja ubicuidad.
+
+![](Img/Diversidad_Ubicuidad_Vista_General.png)
+
+No se explicará en detalle cómo funciona el código.
+
+```{r Diversidad_Ubicuidad_archivo}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_csv = list.files(path = directorio, 
+                          pattern = ".csv", 
+                          all.files = T, 
+                          recursive = T, 
+                          full.names = T)
+
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+nombres = archivos_csv |>  dirname() |>  dirname() |>  basename()
+
+cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
+cat("El archivo csv tiene el nombre: ", nombres, "\n")
+```
+
+Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
+
+```{r Diversidad_Ubicuidad_calculo}
+#| message: false
+#| warning: false
+i = 1
+denue = read.csv(archivos_csv[i]) |> 
+  dplyr::filter(cve_ent == 13)
+
+####################
+### ICE Personal ###
+####################
+
+denue_P = denue  |> 
+  dplyr::mutate(per_ocu = dplyr::case_when(
+    per_ocu == "0 a 5 personas" ~ "2.5",
+    per_ocu == "6 a 10 personas" ~ "8",
+    per_ocu == "11 a 30 personas" ~ "20.5",
+    per_ocu == "31 a 50 personas" ~ "40.5",
+    per_ocu == "51 a 100 personas" ~ "75.5",
+    per_ocu == "101 a 250 personas" ~ "175.5",
+    per_ocu %in% c("251 y más personas", "251 y m\xe1s personas") ~ "251",
+    TRUE ~ per_ocu  
+  ),
+  per_ocu = as.numeric(per_ocu),
+  cvegeo = paste0("13", sprintf("%03d", cve_mun))) |> 
+  dplyr::group_by(cvegeo, codigo_act) |> 
+  dplyr::summarise(suma_per_ocu = sum(per_ocu, na.rm = T))
+
+
+balassa_P = economiccomplexity::balassa_index(trade_data = denue_P, country = "cvegeo", product = "codigo_act", value = "suma_per_ocu")
+complejidad_P = economiccomplexity::complexity_measures(
+  balassa_index = balassa_P,
+  method = "eigenvalues"
+)
+
+
+ICE_P = data.frame(
+  names(complejidad_P$complexity_index_country),
+  complejidad_P$complexity_index_country
+)
+
+names(ICE_P) = c("CVEGEO", paste0("ICE_Personal_", nombres[i]))
+
+
+M = balassa_P |>  as.matrix()
+diversidad = rowSums(M)
+ubicuidad = colSums(M)
+especializado = (1/diversidad)*(M%*%ubicuidad)
+datos_grafica = cbind(c(1:nrow(M)), diversidad, especializado)
+colnames(datos_grafica) = c("CVE_MUN", paste0("diversidad_", nombres[i]) , paste0("especializado_", nombres[i]))
+datos_grafica = datos_grafica |>  as.data.frame()
+
+datos_grafica |>  head()
+```
+
+El resultado debe ser un **data.frame** con 3 columnas:
+
+-   **CVE_MUN**
+
+-   **diversidad_2025A**
+
+-   **especializado_2025A**
+
+*Nota: El nombre de las columnas depende del periodo que descargaste. Por ejemplo:*
+
+-   *Si descargaste **2025A** se llamarán diversidad_2025A y especializado_2025A.*
+
+-   *Si fuera **2025B**, entonces serían diversidad_2025B y especializado_2025B.*
+
+Como es una **actualización del tablero**, necesitas tener antes los **Índices de Complejidad Económica** previos, que en este caso están en el archivo **dive_vs_ubi_6_mun.csv.** El archivo se visualiza asi:
+
+![](Img/Diversidad_Ubicuidad_Datos_Previo.png)
+
+Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
+
+```{r Diversidad_Ubicuidad_guardar}
+diversidad_ubicuidad_previo = read.csv("Datos/Procesados/Antiguos/dive_vs_ubi_6_mun.csv")
+diversidad_ubicuidad_actualizado = merge(x = diversidad_ubicuidad_previo, y = datos_grafica, by = "CVE_MUN")
+
+write.csv(diversidad_ubicuidad_actualizado, "Datos/Procesados/Actualizados/dive_vs_ubi_6_mun.csv", row.names = F, fileEncoding = "UTF-8")
 ```

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Eduardo Alanis Garcia">
 
-<title>Documentacion Tablero de Complejidad Económica</title>
+<title>Documentación Tablero de Complejidad Económica</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -80,7 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Documentacion Tablero de Complejidad Económica</h1>
+<h1 class="title">Documentación Tablero de Complejidad Económica</h1>
 </div>
 
 
@@ -103,8 +103,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="actualización-del-tablero" class="level2">
-<h2 class="anchored" data-anchor-id="actualización-del-tablero">Actualización del Tablero</h2>
+<section id="actualización-del-tablero" class="level1">
+<h1>Actualización del Tablero</h1>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="Img/General_tablero.PNG" class="img-fluid figure-img"></p>
@@ -124,7 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="https://cran.r-project.org/web/packages/economiccomplexity/refman/economiccomplexity.html">Documentación R: package <em>economiccomplexity</em> (CRAN)</a></li>
 <li><a href="https://www.overleaf.com/project/67be428161599fd288d9a578">Mis notas</a></li>
 </ul>
-</section>
 <section id="obtención-de-los-datos" class="level2">
 <h2 class="anchored" data-anchor-id="obtención-de-los-datos">Obtención de los datos</h2>
 <p>Los datos se obtendrán a partir de la descarga masiva del <a href="https://www.inegi.org.mx/app/descarga/?ti=6"><strong><em>Directorio Estadístico Nacional de Unidades Económicas (DENUE).</em></strong></a></p>
@@ -148,24 +147,418 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p><img src="Img/Descarga%20Hidalgo.PNG" class="img-fluid"></p>
 <p><img src="Img/Descarga%20Hidalgo%20Renombrar.PNG" class="img-fluid"></p>
+<p>Por otro lado, cuando es a <strong>nivel nacional</strong> dentro de la página del DENUE utilizaremos los filtros para seleccionar <strong>Estados Unidos Mexicanos</strong> y descargar los 25 archivos CSV.</p>
+<p><img src="Img/Denue_Nacional.PNG" class="img-fluid"></p>
+<p><strong>Recomendaciones para organizar la información:</strong></p>
+<ul>
+<li><p>Descargar los archivos.</p></li>
+<li><p>Guardarlo en una carpeta específica (ejemplo: <em><code>Datos → Originales → Nacional</code></em>).</p></li>
+<li><p>Creamos una carpeta según el periodo:</p>
+<ul>
+<li><p><strong>2025A →</strong> Primer periodo 2025.</p></li>
+<li><p><strong>2025B →</strong> Segundo periodo 2025.</p></li>
+</ul></li>
+</ul>
+<p>Añadimos todos los archivos descargados a esa carpeta.</p>
+<p><img src="Img/Descarga%20Nacional%20Carpeta.PNG" class="img-fluid"></p>
+<p><img src="Img/Descarga%20Nacional%20Todos.PNG" class="img-fluid"></p>
+<section id="descomprimir-archivos" class="level4">
+<h4 class="anchored" data-anchor-id="descomprimir-archivos">Descomprimir archivos</h4>
+<p>Descomprime los archivos de <strong>Hidalgo</strong>. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>archivos_zip <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (zip_file <span class="cf">in</span> archivos_zip) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  nombre_carpeta <span class="ot">=</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(zip_file))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Carpeta destino </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  destino <span class="ot">=</span> <span class="fu">file.path</span>(<span class="fu">dirname</span>(zip_file), nombre_carpeta)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Crear carpeta si no existe</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(destino)) {</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(destino, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraer dentro de la carpeta</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(zip_file, <span class="at">exdir =</span> destino)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Extraído: "</span>, zip_file, <span class="st">" → "</span>, destino)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Hidalgo/2025A.zip → Datos/Originales/Hidalgo/2025A</code></pre>
+</div>
+</div>
+<p><img src="Img/Descomprimir_Hidalgo.png" class="img-fluid"></p>
+<p>De manera analoga los archivos <strong>nivel nacional</strong>. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Nacional/2025A"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>archivos_zip <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (zip_file <span class="cf">in</span> archivos_zip) {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  nombre_carpeta <span class="ot">=</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(zip_file))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Carpeta destino </span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  destino <span class="ot">=</span> <span class="fu">file.path</span>(<span class="fu">dirname</span>(zip_file), nombre_carpeta)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Crear carpeta si no existe</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(destino)) {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(destino, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraer dentro de la carpeta</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(zip_file, <span class="at">exdir =</span> destino)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Extraído: "</span>, zip_file, <span class="st">" → "</span>, destino)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_11_csv.zip → Datos/Originales/Nacional/2025A/denue_00_11_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_21_csv.zip → Datos/Originales/Nacional/2025A/denue_00_21_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_22_csv.zip → Datos/Originales/Nacional/2025A/denue_00_22_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_23_csv.zip → Datos/Originales/Nacional/2025A/denue_00_23_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_31-33_csv.zip → Datos/Originales/Nacional/2025A/denue_00_31-33_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_43_csv.zip → Datos/Originales/Nacional/2025A/denue_00_43_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_46111_csv.zip → Datos/Originales/Nacional/2025A/denue_00_46111_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_46112-46311_csv.zip → Datos/Originales/Nacional/2025A/denue_00_46112-46311_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_46321-46531_csv.zip → Datos/Originales/Nacional/2025A/denue_00_46321-46531_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_46591-46911_csv.zip → Datos/Originales/Nacional/2025A/denue_00_46591-46911_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_48-49_csv.zip → Datos/Originales/Nacional/2025A/denue_00_48-49_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_51_csv.zip → Datos/Originales/Nacional/2025A/denue_00_51_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_52_csv.zip → Datos/Originales/Nacional/2025A/denue_00_52_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_53_csv.zip → Datos/Originales/Nacional/2025A/denue_00_53_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_54_csv.zip → Datos/Originales/Nacional/2025A/denue_00_54_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_55_csv.zip → Datos/Originales/Nacional/2025A/denue_00_55_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_56_csv.zip → Datos/Originales/Nacional/2025A/denue_00_56_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_61_csv.zip → Datos/Originales/Nacional/2025A/denue_00_61_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_62_csv.zip → Datos/Originales/Nacional/2025A/denue_00_62_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_71_csv.zip → Datos/Originales/Nacional/2025A/denue_00_71_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_72_1_csv.zip → Datos/Originales/Nacional/2025A/denue_00_72_1_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_72_2_csv.zip → Datos/Originales/Nacional/2025A/denue_00_72_2_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_81_1_csv.zip → Datos/Originales/Nacional/2025A/denue_00_81_1_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_81_2_csv.zip → Datos/Originales/Nacional/2025A/denue_00_81_2_csv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extraído: Datos/Originales/Nacional/2025A/denue_00_93_csv.zip → Datos/Originales/Nacional/2025A/denue_00_93_csv</code></pre>
+</div>
+</div>
+<p><img src="Img/Descomprimir_nacional.png" class="img-fluid"></p>
+</section>
 </section>
 <section id="índice-de-complejidad-económica" class="level2">
 <h2 class="anchored" data-anchor-id="índice-de-complejidad-económica">Índice de Complejidad Económica</h2>
 <p>El Índice de Complejidad Económica (ECI) es una medida de las habilidades y capacidades técnicas implícitas con las que cuenta una región, el cual captura qué tan compleja es una economía identificando tanto las actividades que puede desarrollar con éxito como en qué otros lugares están presentes esas actividades. Una región con un ECI alto indica que las actividades realizadas en la región requieren capacidades técnicas y habilidades más especializadas. El ECI se calculó con una estimación del número de trabajadores en cada industria y el número de unidades económicas dedicadas a cada industria.</p>
-<ul>
-<li>Content authored with markdown</li>
-<li>Output from executable code</li>
-</ul>
-</section>
-<section id="code" class="level2">
-<h2 class="anchored" data-anchor-id="code">Code</h2>
-<p>When you click the <strong>Render</strong> button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
+<p><img src="Img/ICE_Vista_General.png" class="img-fluid"></p>
+<p>El siguiente <strong>código</strong> muestra cómo <strong>calcular el ECI</strong> de dos formas:</p>
+<ol type="1">
+<li><p>Usando la estimación de <strong>personal de trabajadores</strong> por industria.</p></li>
+<li><p>Usando el número de <strong>unidades económicas.</strong></p></li>
+</ol>
+<p>No se explicará en detalle cómo funciona el código.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pattern =</span> <span class="st">".csv"</span>, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">all.files =</span> T, </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">recursive =</span> T, </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">full.names =</span> T)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> archivos_csv[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"diccionario"</span>, archivos_csv)]</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>nombres <span class="ot">=</span> archivos_csv <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">basename</span>()</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv ha abrir es: "</span>, archivos_csv, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<pre><code>El archivo csv ha abrir es:  Datos/Originales/Hidalgo/2025A/conjunto_de_datos/denue_inegi_13_.csv </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv tiene el nombre: "</span>, nombres, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv tiene el nombre:  2025A </code></pre>
 </div>
 </div>
+<p>Unicamente verifica que este abriendo el archivo <strong>denue_inegi_13_.csv</strong> y que el nombre del archivo sea con el correspondiente que renombraste.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>i <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> <span class="fu">read.csv</span>(archivos_csv[i]) <span class="sc">|&gt;</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cve_ent <span class="sc">==</span> <span class="dv">13</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="do">### ICE Personal </span><span class="al">###</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>denue_P <span class="ot">=</span> denue  <span class="sc">|&gt;</span> </span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">per_ocu =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"0 a 5 personas"</span> <span class="sc">~</span> <span class="st">"2.5"</span>,</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"6 a 10 personas"</span> <span class="sc">~</span> <span class="st">"8"</span>,</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"11 a 30 personas"</span> <span class="sc">~</span> <span class="st">"20.5"</span>,</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"31 a 50 personas"</span> <span class="sc">~</span> <span class="st">"40.5"</span>,</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"51 a 100 personas"</span> <span class="sc">~</span> <span class="st">"75.5"</span>,</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"101 a 250 personas"</span> <span class="sc">~</span> <span class="st">"175.5"</span>,</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"251 y más personas"</span>, <span class="st">"251 y m</span><span class="sc">\xe1</span><span class="st">s personas"</span>) <span class="sc">~</span> <span class="st">"251"</span>,</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> per_ocu  </span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">per_ocu =</span> <span class="fu">as.numeric</span>(per_ocu),</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">cvegeo =</span> <span class="fu">paste0</span>(<span class="st">"13"</span>, <span class="fu">sprintf</span>(<span class="st">"%03d"</span>, cve_mun))) <span class="sc">|&gt;</span> </span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cvegeo, codigo_act) <span class="sc">|&gt;</span> </span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">suma_per_ocu =</span> <span class="fu">sum</span>(per_ocu, <span class="at">na.rm =</span> T))</span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>balassa_P <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">balassa_index</span>(<span class="at">trade_data =</span> denue_P, <span class="at">country =</span> <span class="st">"cvegeo"</span>, <span class="at">product =</span> <span class="st">"codigo_act"</span>, <span class="at">value =</span> <span class="st">"suma_per_ocu"</span>)</span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>complejidad_P <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">complexity_measures</span>(</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">balassa_index =</span> balassa_P,</span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"eigenvalues"</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>ICE_P <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(complejidad_P<span class="sc">$</span>complexity_index_country),</span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>  complejidad_P<span class="sc">$</span>complexity_index_country</span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ICE_P) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"CVEGEO"</span>, <span class="fu">paste0</span>(<span class="st">"ICE_Personal_"</span>, nombres[i]))</span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a><span class="do">### ICE UNIDADES </span><span class="al">###</span></span>
+<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>denue_U <span class="ot">=</span> denue  <span class="sc">|&gt;</span> </span>
+<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">cvegeo =</span> <span class="fu">paste0</span>(<span class="st">"13"</span>, <span class="fu">sprintf</span>(<span class="st">"%03d"</span>, cve_mun))) <span class="sc">|&gt;</span> </span>
+<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cvegeo, codigo_act) <span class="sc">|&gt;</span> </span>
+<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">suma_unidades =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span>  </span>
+<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() </span>
+<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-52"><a href="#cb33-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-53"><a href="#cb33-53" aria-hidden="true" tabindex="-1"></a>complejidad_U <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">complexity_measures</span>(</span>
+<span id="cb33-54"><a href="#cb33-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">balassa_index =</span> economiccomplexity<span class="sc">::</span><span class="fu">balassa_index</span>(<span class="at">trade_data =</span> denue_U, <span class="at">country =</span> <span class="st">"cvegeo"</span>, <span class="at">product =</span> <span class="st">"codigo_act"</span>, <span class="at">value =</span> <span class="st">"suma_unidades"</span>),</span>
+<span id="cb33-55"><a href="#cb33-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"eigenvalues"</span></span>
+<span id="cb33-56"><a href="#cb33-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-57"><a href="#cb33-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-58"><a href="#cb33-58" aria-hidden="true" tabindex="-1"></a>ICE_U <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb33-59"><a href="#cb33-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(complejidad_U<span class="sc">$</span>complexity_index_country),</span>
+<span id="cb33-60"><a href="#cb33-60" aria-hidden="true" tabindex="-1"></a>  complejidad_U<span class="sc">$</span>complexity_index_country</span>
+<span id="cb33-61"><a href="#cb33-61" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-62"><a href="#cb33-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-63"><a href="#cb33-63" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ICE_U) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"CVEGEO"</span>, <span class="fu">paste0</span>(<span class="st">"ICE_Unidades_"</span>, nombres[i]))</span>
+<span id="cb33-64"><a href="#cb33-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-65"><a href="#cb33-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-66"><a href="#cb33-66" aria-hidden="true" tabindex="-1"></a>ICE <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> ICE_P, <span class="at">y =</span> ICE_U, <span class="at">by =</span> <span class="st">"CVEGEO"</span>, <span class="at">all.x =</span> T)</span>
+<span id="cb33-67"><a href="#cb33-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-68"><a href="#cb33-68" aria-hidden="true" tabindex="-1"></a>ICE <span class="sc">|&gt;</span>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  CVEGEO ICE_Personal_2025A ICE_Unidades_2025A
+1  13001         -0.2316548         -0.1013980
+2  13002         -0.3352427         -0.2047998
+3  13003          0.5986708          1.1398258
+4  13004         -0.4933637         -0.2825526
+5  13005         -0.2479474         -0.2011470
+6  13006         -0.1966782         -0.2817761</code></pre>
+</div>
+</div>
+<p>El resultado debe ser un <strong>data.frame</strong> con 3 columnas:</p>
+<ul>
+<li><p><strong>CVEGEO</strong></p></li>
+<li><p><strong>ICE_Personal_2025A</strong></p></li>
+<li><p><strong>ICE_Unidades_2025A</strong></p></li>
+</ul>
+<p><em>Nota: El nombre de las columnas depende del periodo que descargaste. Por ejemplo:</em></p>
+<ul>
+<li><p><em>Si descargaste <strong>2025A</strong> se llamarán ICE_Personal_2025A y ICE_Unidades_2025A.</em></p></li>
+<li><p><em>Si fuera <strong>2025B</strong>, entonces serían ICE_Personal_2025B y ICE_Unidades_2025B.</em></p></li>
+</ul>
+<p>Como es una <strong>actualización del tablero</strong>, necesitas tener antes los <strong>Índices de Complejidad Económica</strong> previos, que en este caso están en el archivo <strong>estatal.csv.</strong> El archivo se visualiza asi:</p>
+<p><img src="Img/ICE_Captura_archivo.png" class="img-fluid"></p>
+<p>Asi que adjuntaremos lo obtenido previamente ha dicho archivo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>ICE_previo <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"Datos/Procesados/Antiguos/estatal.csv"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>personal_previo <span class="ot">=</span> <span class="fu">names</span>(ICE_previo) <span class="sc">|&gt;</span>  <span class="fu">grep</span>(<span class="at">pattern =</span> <span class="st">"ICE_Personal"</span>, <span class="at">value =</span> T)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>personal_previo <span class="ot">=</span> personal_previo[<span class="fu">length</span>(personal_previo)]  </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>unidades_previo <span class="ot">=</span> <span class="fu">names</span>(ICE_previo) <span class="sc">|&gt;</span>  <span class="fu">grep</span>(<span class="at">pattern =</span> <span class="st">"ICE_Unidades"</span>, <span class="at">value =</span> T)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>unidades_previo <span class="ot">=</span> unidades_previo[<span class="fu">length</span>(unidades_previo)]</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El ultimo realizado ICE Personal es: "</span>, personal_previo, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El ultimo realizado ICE Personal es:  ICE_Personal_2024B </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El ultimo realizado ICE Unidades es: "</span>, unidades_previo, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El ultimo realizado ICE Unidades es:  ICE_Unidades_2024B </code></pre>
+</div>
+</div>
+<p><em><strong>Nota:</strong> Aqui en la linea de codigo donde se encuentran los <strong>dplyr::relocate</strong> si debes modificar manualmente los nombres de las columnas.</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>ICE_actualizado <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> ICE_previo, <span class="at">y =</span> ICE, <span class="at">by =</span> <span class="st">"CVEGEO"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>ICE_actualizado <span class="ot">=</span> ICE_actualizado <span class="sc">|&gt;</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(ICE_Personal_2025A, <span class="at">.after =</span> ICE_Personal_2024B) <span class="sc">|&gt;</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(ICE_Unidades_2025A, <span class="at">.after =</span> ICE_Unidades_2024B)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(ICE_actualizado, <span class="st">"Datos/Procesados/Actualizados/estatal.csv"</span>, <span class="at">row.names =</span> F, <span class="at">fileEncoding =</span> <span class="st">"UTF-8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="afinidad-y-complejidad-del-producto." class="level2">
+<h2 class="anchored" data-anchor-id="afinidad-y-complejidad-del-producto.">Afinidad y Complejidad del producto.</h2>
+<p>PENDIENTE PORQUE ES EL QUE CONSUME MAS RECURSOS Y MAS TARDADO.</p>
+<p><img src="Img/Afinidad_Complejidad_Vista_General.png" class="img-fluid"></p>
+</section>
+<section id="diversidad-y-ubicuidad-promedio." class="level2">
+<h2 class="anchored" data-anchor-id="diversidad-y-ubicuidad-promedio.">Diversidad y Ubicuidad promedio.</h2>
+<ul>
+<li><p><strong>Diversidad</strong> indica el número de actividades económicas en las que está especializada cada entidad.</p></li>
+<li><p><strong>Ubicuidad</strong> indica cuántas entidades están especializadas en cada actividad económica.</p></li>
+</ul>
+<p>Las entidades <strong>peor posicionadas</strong> están en el <strong>primer cuadrante</strong> (superior derecha), donde muestran baja diversidad y alta ubicuidad. En contraste, las entidades que se <strong>posicionan mejor</strong> se encuentran en el <strong>cuarto cuadrante</strong> (inferior derecha), caracterizado por alta diversificación y baja ubicuidad.</p>
+<p><img src="Img/Diversidad_Ubicuidad_Vista_General.png" class="img-fluid"></p>
+<p>No se explicará en detalle cómo funciona el código.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pattern =</span> <span class="st">".csv"</span>, </span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">all.files =</span> T, </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">recursive =</span> T, </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">full.names =</span> T)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> archivos_csv[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"diccionario"</span>, archivos_csv)]</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>nombres <span class="ot">=</span> archivos_csv <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">basename</span>()</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv ha abrir es: "</span>, archivos_csv, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv ha abrir es:  Datos/Originales/Hidalgo/2025A/conjunto_de_datos/denue_inegi_13_.csv </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv tiene el nombre: "</span>, nombres, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv tiene el nombre:  2025A </code></pre>
+</div>
+</div>
+<p>Unicamente verifica que este abriendo el archivo <strong>denue_inegi_13_.csv</strong> y que el nombre del archivo sea con el correspondiente que renombraste.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>i <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> <span class="fu">read.csv</span>(archivos_csv[i]) <span class="sc">|&gt;</span> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cve_ent <span class="sc">==</span> <span class="dv">13</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="do">### ICE Personal </span><span class="al">###</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>denue_P <span class="ot">=</span> denue  <span class="sc">|&gt;</span> </span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">per_ocu =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"0 a 5 personas"</span> <span class="sc">~</span> <span class="st">"2.5"</span>,</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"6 a 10 personas"</span> <span class="sc">~</span> <span class="st">"8"</span>,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"11 a 30 personas"</span> <span class="sc">~</span> <span class="st">"20.5"</span>,</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"31 a 50 personas"</span> <span class="sc">~</span> <span class="st">"40.5"</span>,</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"51 a 100 personas"</span> <span class="sc">~</span> <span class="st">"75.5"</span>,</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"101 a 250 personas"</span> <span class="sc">~</span> <span class="st">"175.5"</span>,</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"251 y más personas"</span>, <span class="st">"251 y m</span><span class="sc">\xe1</span><span class="st">s personas"</span>) <span class="sc">~</span> <span class="st">"251"</span>,</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> per_ocu  </span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">per_ocu =</span> <span class="fu">as.numeric</span>(per_ocu),</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">cvegeo =</span> <span class="fu">paste0</span>(<span class="st">"13"</span>, <span class="fu">sprintf</span>(<span class="st">"%03d"</span>, cve_mun))) <span class="sc">|&gt;</span> </span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cvegeo, codigo_act) <span class="sc">|&gt;</span> </span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">suma_per_ocu =</span> <span class="fu">sum</span>(per_ocu, <span class="at">na.rm =</span> T))</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>balassa_P <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">balassa_index</span>(<span class="at">trade_data =</span> denue_P, <span class="at">country =</span> <span class="st">"cvegeo"</span>, <span class="at">product =</span> <span class="st">"codigo_act"</span>, <span class="at">value =</span> <span class="st">"suma_per_ocu"</span>)</span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>complejidad_P <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">complexity_measures</span>(</span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">balassa_index =</span> balassa_P,</span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"eigenvalues"</span></span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-33"><a href="#cb44-33" aria-hidden="true" tabindex="-1"></a>ICE_P <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb44-34"><a href="#cb44-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(complejidad_P<span class="sc">$</span>complexity_index_country),</span>
+<span id="cb44-35"><a href="#cb44-35" aria-hidden="true" tabindex="-1"></a>  complejidad_P<span class="sc">$</span>complexity_index_country</span>
+<span id="cb44-36"><a href="#cb44-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-37"><a href="#cb44-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-38"><a href="#cb44-38" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ICE_P) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"CVEGEO"</span>, <span class="fu">paste0</span>(<span class="st">"ICE_Personal_"</span>, nombres[i]))</span>
+<span id="cb44-39"><a href="#cb44-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-40"><a href="#cb44-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-41"><a href="#cb44-41" aria-hidden="true" tabindex="-1"></a>M <span class="ot">=</span> balassa_P <span class="sc">|&gt;</span>  <span class="fu">as.matrix</span>()</span>
+<span id="cb44-42"><a href="#cb44-42" aria-hidden="true" tabindex="-1"></a>diversidad <span class="ot">=</span> <span class="fu">rowSums</span>(M)</span>
+<span id="cb44-43"><a href="#cb44-43" aria-hidden="true" tabindex="-1"></a>ubicuidad <span class="ot">=</span> <span class="fu">colSums</span>(M)</span>
+<span id="cb44-44"><a href="#cb44-44" aria-hidden="true" tabindex="-1"></a>especializado <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>diversidad)<span class="sc">*</span>(M<span class="sc">%*%</span>ubicuidad)</span>
+<span id="cb44-45"><a href="#cb44-45" aria-hidden="true" tabindex="-1"></a>datos_grafica <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(M)), diversidad, especializado)</span>
+<span id="cb44-46"><a href="#cb44-46" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(datos_grafica) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"CVE_MUN"</span>, <span class="fu">paste0</span>(<span class="st">"diversidad_"</span>, nombres[i]) , <span class="fu">paste0</span>(<span class="st">"especializado_"</span>, nombres[i]))</span>
+<span id="cb44-47"><a href="#cb44-47" aria-hidden="true" tabindex="-1"></a>datos_grafica <span class="ot">=</span> datos_grafica <span class="sc">|&gt;</span>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb44-48"><a href="#cb44-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-49"><a href="#cb44-49" aria-hidden="true" tabindex="-1"></a>datos_grafica <span class="sc">|&gt;</span>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      CVE_MUN diversidad_2025A especializado_2025A
+13001       1               68            30.11765
+13002       2               94            29.53191
+13003       3              194            21.55670
+13004       4               92            30.93478
+13005       5              106            29.08491
+13006       6              100            28.92000</code></pre>
+</div>
+</div>
+<p>El resultado debe ser un <strong>data.frame</strong> con 3 columnas:</p>
+<ul>
+<li><p><strong>CVE_MUN</strong></p></li>
+<li><p><strong>diversidad_2025A</strong></p></li>
+<li><p><strong>especializado_2025A</strong></p></li>
+</ul>
+<p><em>Nota: El nombre de las columnas depende del periodo que descargaste. Por ejemplo:</em></p>
+<ul>
+<li><p><em>Si descargaste <strong>2025A</strong> se llamarán diversidad_2025A y especializado_2025A.</em></p></li>
+<li><p><em>Si fuera <strong>2025B</strong>, entonces serían diversidad_2025B y especializado_2025B.</em></p></li>
+</ul>
+<p>Como es una <strong>actualización del tablero</strong>, necesitas tener antes los <strong>Índices de Complejidad Económica</strong> previos, que en este caso están en el archivo <strong>dive_vs_ubi_6_mun.csv.</strong> El archivo se visualiza asi:</p>
+<p><img src="Img/Diversidad_Ubicuidad_Datos_Previo.png" class="img-fluid"></p>
+<p>Asi que adjuntaremos lo obtenido previamente ha dicho archivo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>diversidad_ubicuidad_previo <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"Datos/Procesados/Antiguos/dive_vs_ubi_6_mun.csv"</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>diversidad_ubicuidad_actualizado <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> diversidad_ubicuidad_previo, <span class="at">y =</span> datos_grafica, <span class="at">by =</span> <span class="st">"CVE_MUN"</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(diversidad_ubicuidad_actualizado, <span class="st">"Datos/Procesados/Actualizados/dive_vs_ubi_6_mun.csv"</span>, <span class="at">row.names =</span> F, <span class="at">fileEncoding =</span> <span class="st">"UTF-8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 
 </main>
