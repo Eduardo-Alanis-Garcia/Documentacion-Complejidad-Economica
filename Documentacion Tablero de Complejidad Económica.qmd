@@ -281,9 +281,151 @@ write.csv(ICE_actualizado, "Datos/Procesados/Actualizados/estatal.csv", row.name
 
 ## Afinidad y Complejidad del producto.
 
-PENDIENTE PORQUE ES EL QUE CONSUME MAS RECURSOS Y MAS TARDADO.
+La afinidad indica la probabilidad de que un estado comience o deje de desarrollar una determinada actividad, mientras que la complejidad está asociada con mayores niveles de ingresos, crecimiento económico, menor desigualdad de ingresos, etc. De esta manera, el gráfico Afinidad-Complejidad compara el riesgo y el valor estratégico en oportunidades para desarrollar una actividad industrial en un estado. Cada círculo muestra una industria, y su tamaño refleja el número aproximado de empleados.
 
 ![](Img/Afinidad_Complejidad_Vista_General.png)
+
+En este caso se usarán todos los datos nacionales. Para ello, es necesario abrir todos los archivos y unirlos para poder hacer uso del calculo de afinidad.
+
+```{r abrir_archivos_nacional}
+directorio = "Datos/Originales/Nacional/2025A/"
+archivos_csv = list.files(path = directorio, pattern = "\\.csv$", all.files = T, full.names = T, recursive = T)
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+
+
+archivos = lapply(archivos_csv, function(x) {
+  df = read.csv(x,  fileEncoding = "latin1")
+  df = df |>  
+    dplyr::select(cve_ent, cve_mun, cve_loc, codigo_act, per_ocu)
+  df
+})
+
+datos = dplyr::bind_rows(archivos)
+
+```
+
+Con todos los archivos CSV unidos en un solo data.frame llamado datos, se realizará el cálculo de la afinidad, no se explicará en detalle cómo funciona el código.
+
+```{r afinidad_complejidad_calculo}
+df = datos
+
+denue = datos
+
+datos = denue  |> 
+  dplyr::mutate(per_ocu = dplyr::case_when(
+    per_ocu == "0 a 5 personas" ~ "2.5",
+    per_ocu == "6 a 10 personas" ~ "8",
+    per_ocu == "11 a 30 personas" ~ "20.5",
+    per_ocu == "31 a 50 personas" ~ "40.5",
+    per_ocu == "51 a 100 personas" ~ "75.5",
+    per_ocu == "101 a 250 personas" ~ "175.5",
+    per_ocu %in% c("251 y más personas", "251 y m\xe1s personas") ~ "251",
+    TRUE ~ per_ocu  
+  ),
+  per_ocu = as.numeric(per_ocu)
+  ) |> 
+  dplyr::group_by(cve_ent, codigo_act) |> 
+  dplyr::summarise(suma_per_ocu = sum(per_ocu, na.rm = T))
+
+# Calculo de balassa
+M = economiccomplexity::balassa_index(trade_data = datos, country = "cve_ent", product = "codigo_act", value = "suma_per_ocu")
+
+# Indice de complejidad producto
+complejidad =  economiccomplexity::complexity_measures(balassa_index = M, method = "eigenvalues" ) 
+complejidad_producto = data.frame(names(complejidad$complexity_index_product), complejidad$complexity_index_product)
+names(complejidad_producto) = c("codigo_act", "complejidad_producto")
+
+
+# Afinidad
+phi = economiccomplexity::proximity(M)
+phi_product = as.matrix(phi$proximity_product)
+I = diag(length(rowSums(as.matrix(phi_product))))*(1/rowSums(as.matrix(phi_product)))
+matriz_afinidad = (as.matrix(M) %*% t(as.matrix(phi_product))) %*% I
+colnames(matriz_afinidad) = colnames(phi_product)
+afinidad = cbind(colnames(matriz_afinidad), matriz_afinidad[13,])  # Afinidad de hidalgo
+colnames(afinidad) = c("codigo_act", "afinidad")
+
+
+
+# Personal por producto
+personal = datos |> dplyr::filter(cve_ent == 13) |>
+  dplyr::group_by(codigo_act) |>
+  dplyr::summarise(personal_ocupado = sum(suma_per_ocu))
+
+preparacion_afinidad = merge(x = complejidad_producto, y = afinidad, by.x = "codigo_act", by.y = "codigo_act" )
+preparacion_afinidad = merge(x = preparacion_afinidad, y = personal, by.x = "codigo_act", by.y = "codigo_act" )
+
+nombres = directorio |>  basename()
+names(preparacion_afinidad)[2:ncol(preparacion_afinidad)] = paste0(names(preparacion_afinidad)[2:ncol(preparacion_afinidad)], "_", nombres)
+
+preparacion_afinidad |>  head()
+```
+
+El resultado debe ser un **data.frame** con 4 columnas:
+
+-   **codigo_act**
+
+-   **complejidad_producto_2025A**
+
+-   **afinidad_2025A**
+
+-   **personal_ocupado_2025A**
+
+*Nota: El nombre de las columnas depende del periodo que descargaste. Por ejemplo:*
+
+-   *Si descargaste **2025A** se llamarán complejidad_producto_2025A, analogamente las demas columnas.*
+
+-   *Si fuera **2025B**, entonces serían complejidad_producto_2025B, analogamente las demas columnas.*
+
+Como es una **actualización del tablero**, necesitas tener antes los **Afinidad y Complejidad del Productos** previos, que en este caso están en el archivo **afinidad_6_nombres.csv.** El archivo se visualiza asi:
+
+![](Img/Afinidad_Complejidad_Datos_Vista_General.png)
+
+Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
+
+```{r afinidad_guardar}
+afinidad_previo = read.csv("Datos/Procesados/Antiguos/afinidad_6_nombres.csv")
+
+afinidad_actualizado = merge(x = afinidad_previo, y = preparacion_afinidad, by = "codigo_act", all.x = T, all.y = T)
+afinidad_actualizado = afinidad_actualizado |> 
+  dplyr::relocate(complejidad_producto_2025A:personal_ocupado_2025A, .after = personal_ocupado_2024B) |> 
+  dplyr::relocate(afinidad_2025A, .after = complejidad_producto_2025A) |> 
+  dplyr::relocate(personal_ocupado_2025A, .after = afinidad_2025A)  
+
+
+scian = readxl::read_excel("Datos/scian_2023_categorias_y_productos.xlsx")[,c(1,2)]
+names(scian) = scian[1,]
+scian = scian[-1,]
+
+scian = scian |> 
+  dplyr::filter(!is.na(Código))
+
+scian_seis = scian |> 
+  dplyr::filter(nchar(Código) == 6) |> 
+  dplyr::mutate(Título = sub("T$", "", Título))
+
+scian_dos = scian |> 
+  dplyr::filter(nchar(Código) == 2) |> 
+  dplyr::mutate(Título = sub("T$", "", Título)) |> 
+  dplyr::rename(Título_dos_digitos = Título)
+
+afinidad_actualizado = afinidad_actualizado |> 
+  dplyr::select(-Título,-codigo_act_dos_digitos,-Título_dos_digitos)
+
+
+
+afinidad_actualizado = merge(x = afinidad_actualizado, y = scian_seis, by.x = "codigo_act", by.y = "Código", all.x = T)
+afinidad_actualizado = afinidad_actualizado |> 
+  dplyr::relocate(Título, .after = codigo_act) |> 
+  dplyr::mutate(codigo_act_dos_digitos = substr(x = codigo_act, start = 1, stop = 2))
+
+afinidad_actualizado = merge(x = afinidad_actualizado, y = scian_dos, by.x = "codigo_act_dos_digitos", by.y = "Código", all.x = T)
+afinidad_actualizado = afinidad_actualizado |> 
+  dplyr::relocate(codigo_act_dos_digitos, .before = Título_dos_digitos) |> 
+  dplyr::arrange(codigo_act)
+
+write.csv(afinidad_actualizado, "Datos/Procesados/Actualizados/afinidad_6_nombres.csv", row.names = F, fileEncoding = "UTF-8")
+```
 
 ## Diversidad y Ubicuidad promedio.
 
@@ -297,7 +439,7 @@ Las entidades **peor posicionadas** están en el **primer cuadrante** (superior 
 
 No se explicará en detalle cómo funciona el código.
 
-```{r Diversidad_Ubicuidad_archivo}
+```{r afinidad_complejidad_archivo}
 directorio = "Datos/Originales/Hidalgo/"
 archivos_csv = list.files(path = directorio, 
                           pattern = ".csv", 
@@ -393,4 +535,155 @@ diversidad_ubicuidad_previo = read.csv("Datos/Procesados/Antiguos/dive_vs_ubi_6_
 diversidad_ubicuidad_actualizado = merge(x = diversidad_ubicuidad_previo, y = datos_grafica, by = "CVE_MUN")
 
 write.csv(diversidad_ubicuidad_actualizado, "Datos/Procesados/Actualizados/dive_vs_ubi_6_mun.csv", row.names = F, fileEncoding = "UTF-8")
+```
+
+## Red Hidalgo
+
+Es una red en la que cada nodo corresponde a un municipio y los nodos se conectan si existen productos similares, lo que sugiere que comparten habilidades, conocimientos y tecnología parecidas. Los colores de los nodos representan la región a la que pertenecen y su tamaño refleja el número aproximado de empleados.
+
+![](Img/Espacio_Entidades_Vista_General.png)
+
+En este apartado se crea un archivo nuevo, el cual debe tener la siguiente estructura:
+
+![](Img/Espacio_Entidades_Datos_Previos.png)
+
+Estos archivos suelen tener por nombre **Red_Hidalgo_2024B.** No se explicará en detalle cómo funciona el código.
+
+```{r Red_Hidalgo_archivo}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_csv = list.files(path = directorio, 
+                          pattern = ".csv", 
+                          all.files = T, 
+                          recursive = T, 
+                          full.names = T)
+
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+nombres = archivos_csv |>  dirname() |>  dirname() |>  basename()
+
+cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
+cat("El archivo csv tiene el nombre: ", nombres, "\n")
+```
+
+Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
+
+```{r Red_Hidalgo_realizar_guardar}
+#| message: false
+#| warning: false
+i = 1
+denue = read.csv(archivos_csv[i]) |> 
+  dplyr::filter(cve_ent == 13)
+
+####################
+### ICE Personal ###
+####################
+
+denue_P = denue  |> 
+  dplyr::mutate(per_ocu = dplyr::case_when(
+    per_ocu == "0 a 5 personas" ~ "2.5",
+    per_ocu == "6 a 10 personas" ~ "8",
+    per_ocu == "11 a 30 personas" ~ "20.5",
+    per_ocu == "31 a 50 personas" ~ "40.5",
+    per_ocu == "51 a 100 personas" ~ "75.5",
+    per_ocu == "101 a 250 personas" ~ "175.5",
+    per_ocu %in% c("251 y más personas", "251 y m\xe1s personas") ~ "251",
+    TRUE ~ per_ocu  
+  ),
+  per_ocu = as.numeric(per_ocu),
+  cvegeo = paste0("13", sprintf("%03d", cve_mun))) |> 
+  dplyr::group_by(cvegeo, codigo_act) |> 
+  dplyr::summarise(suma_per_ocu = sum(per_ocu, na.rm = T))
+
+
+balassa_matriz = economiccomplexity::balassa_index(trade_data = denue_P, country = "cvegeo", product = "codigo_act", value = "suma_per_ocu")
+pro = economiccomplexity::proximity(balassa_matriz)
+net = economiccomplexity::projections(pro$proximity_country, pro$proximity_product)
+
+pesos_grafo = denue_P |> dplyr::group_by(cvegeo) |>
+  dplyr::summarise(peso_nodo1 = sum(suma_per_ocu, na.rm = TRUE))
+
+pais = net$network_country
+peso_aristas = igraph::edge_attr(pais, "weight")
+conexiones = igraph::as_edgelist(pais)
+interes = as.data.frame(cbind(conexiones,peso_aristas ))
+colnames(interes) = c("nodo1", "nodo2", "peso_arista")
+
+
+p = merge(x = interes, y = pesos_grafo, by.x = "nodo1", by.y = "cvegeo")
+colnames(pesos_grafo)[2] = "peso_nodo2"
+
+p = merge(x = p, y = pesos_grafo, by.x = "nodo2", by.y = "cvegeo")
+p = p[, c(2,1,3:5)]
+
+p = p |>
+  dplyr::mutate(nodo1 = as.numeric(nodo1), nodo2 = as.numeric(nodo2)) |>
+  dplyr::arrange(nodo1,nodo2)
+
+
+datos = p
+datos = datos |> 
+  dplyr::mutate(nodo1 = as.character(nodo1),
+                nodo2 = as.character(nodo2),
+                nodo1 = substr(x = nodo1, start = 3, stop = nchar(nodo1)),
+                nodo2 = substr(x = nodo2, start = 3, stop = nchar(nodo2)),
+                nodo1 = as.numeric(nodo1),
+                nodo2 = as.numeric(nodo2),
+                )
+
+nombres_mun = readxl::read_excel("Datos/Banco de datos infografias _Eduardo.xlsx")
+nombres_mun = nombres_mun |> 
+  dplyr::filter(!is.na(Región)) 
+nombres_mun = nombres_mun |> 
+  dplyr::mutate(CVE_MUN = 1:nrow(nombres_mun)) |>
+  dplyr::select(CVE_MUN, Municipio, Región)
+
+datos = merge(x = datos, y = nombres_mun, by.x = "nodo1", by.y = "CVE_MUN", all.x = T)
+datos = datos |> 
+  dplyr::rename(nodo1_nombre = Municipio,
+                nodo1_region = Región)
+
+datos = merge(x = datos, y = nombres_mun, by.x = "nodo2", by.y = "CVE_MUN", all.x = T)
+datos = datos |> 
+  dplyr::rename(nodo2_nombre = Municipio,
+                nodo2_region = Región) |> 
+  dplyr::relocate(nodo2_nombre, .after = nodo1_nombre) |> 
+  dplyr::relocate(nodo2_region, .after = nodo1_region) |> 
+  dplyr::relocate(nodo2, .after = nodo1) |> 
+  dplyr::arrange(nodo1, nodo2)
+
+write.csv(datos, paste0("Datos/Procesados/Actualizados/", "Red_Hidalgo_", nombres[i],".csv"), row.names = F, fileEncoding = "UTF-8")
+```
+
+## Espacio Producto
+
+El espacio de producto es una red en la que cada nodo corresponde a un producto, y los nodos se conectan si existe una alta probabilidad de ser coproducidos. Esto implica que los productos conectados comparten requisitos similares en términos de capacidades productivas, conocimientos y tecnologías. Puede ser utilizado para predecir actividades futuras y el crecimiento económico de un país. Los colores de los nodos representan un sector industrial y su tamaño refleja el número aproximado de empleados.
+
+![](Img/Espacio_Producto_Vista_General.png)
+
+En este apartado se crea un archivo nuevo, el cual debe tener la siguiente estructura:
+
+![](Img/Espacio_Entidades_Datos_Previos.png)
+
+Estos archivos suelen tener por nombre **Red_Hidalgo_2024B.** No se explicará en detalle cómo funciona el código.
+
+```{r Espacio_Producto_archivo}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_csv = list.files(path = directorio, 
+                          pattern = ".csv", 
+                          all.files = T, 
+                          recursive = T, 
+                          full.names = T)
+
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+nombres = archivos_csv |>  dirname() |>  dirname() |>  basename()
+
+cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
+cat("El archivo csv tiene el nombre: ", nombres, "\n")
+```
+
+Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
+
+```{r Espacio_Producto_Calculo}
+#| message: false
+#| warning: false
+
 ```
