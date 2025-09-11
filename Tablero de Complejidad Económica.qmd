@@ -5,8 +5,6 @@ format: html
 editor: visual
 ---
 
-
-
 # Actualización del Tablero
 
 ![Vista general del tablero](Img/General_tablero.PNG){fig-align="center"}
@@ -81,8 +79,6 @@ Añadimos todos los archivos descargados a esa carpeta.
 
 Descomprime los archivos de **Hidalgo**. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.
 
-
-
 ```{r descomprimir_hidalgo}
 directorio = "Datos/Originales/Hidalgo/"
 archivos_zip = list.files(path = directorio, recursive = TRUE, full.names = TRUE, pattern = "\\.zip")
@@ -101,18 +97,12 @@ for (zip_file in archivos_zip) {
   
   # Extraer dentro de la carpeta
   unzip(zip_file, exdir = destino)
-  
-  message("Extraído: ", zip_file, " → ", destino)
 }
 ```
-
-
 
 ![](Img/Descomprimir_Hidalgo.png)
 
 De manera analoga los archivos **nivel nacional**. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.
-
-
 
 ```{r descomprimir_nacional}
 directorio = "Datos/Originales/Nacional/2025A"
@@ -132,12 +122,8 @@ for (zip_file in archivos_zip) {
   
   # Extraer dentro de la carpeta
   unzip(zip_file, exdir = destino)
-  
-  message("Extraído: ", zip_file, " → ", destino)
 }
 ```
-
-
 
 ![](Img/Descomprimir_nacional.png)
 
@@ -155,8 +141,6 @@ El siguiente **código** muestra cómo **calcular el ECI** de dos formas:
 
 No se explicará en detalle cómo funciona el código.
 
-
-
 ```{r ECI_archivo}
 directorio = "Datos/Originales/Hidalgo/"
 archivos_csv = list.files(path = directorio, 
@@ -172,11 +156,7 @@ cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
 cat("El archivo csv tiene el nombre: ", nombres, "\n")
 ```
 
-
-
 Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
-
-
 
 ```{r ECI}
 #| message: false
@@ -251,8 +231,6 @@ ICE = merge(x = ICE_P, y = ICE_U, by = "CVEGEO", all.x = T)
 ICE |>  head()
 ```
 
-
-
 El resultado debe ser un **data.frame** con 3 columnas:
 
 -   **CVEGEO**
@@ -273,8 +251,6 @@ Como es una **actualización del tablero**, necesitas tener antes los **Índices
 
 Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
 
-
-
 ```{r ECI_previos}
 ICE_previo = read.csv("Datos/Procesados/Antiguos/estatal.csv")
 personal_previo = names(ICE_previo) |>  grep(pattern = "ICE_Personal", value = T)
@@ -286,11 +262,7 @@ cat("El ultimo realizado ICE Personal es: ", personal_previo, "\n")
 cat("El ultimo realizado ICE Unidades es: ", unidades_previo, "\n")
 ```
 
-
-
 ***Nota:** Aqui en la linea de codigo donde se encuentran los **dplyr::relocate** si debes modificar manualmente los nombres de las columnas.*
-
-
 
 ```{r ECI_guardar}
 
@@ -303,8 +275,6 @@ ICE_actualizado = ICE_actualizado |>
 write.csv(ICE_actualizado, "Datos/Procesados/Actualizados/estatal.csv", row.names = F, fileEncoding = "UTF-8")
 ```
 
-
-
 ## Afinidad y Complejidad del producto.
 
 La afinidad indica la probabilidad de que un estado comience o deje de desarrollar una determinada actividad, mientras que la complejidad está asociada con mayores niveles de ingresos, crecimiento económico, menor desigualdad de ingresos, etc. De esta manera, el gráfico Afinidad-Complejidad compara el riesgo y el valor estratégico en oportunidades para desarrollar una actividad industrial en un estado. Cada círculo muestra una industria, y su tamaño refleja el número aproximado de empleados.
@@ -313,8 +283,6 @@ La afinidad indica la probabilidad de que un estado comience o deje de desarroll
 
 En este caso se usarán todos los datos nacionales. Para ello, es necesario abrir todos los archivos y unirlos para poder hacer uso del calculo de afinidad.
 
-
-
 ```{r abrir_archivos_nacional}
 directorio = "Datos/Originales/Nacional/2025A/"
 archivos_csv = list.files(path = directorio, pattern = "\\.csv$", all.files = T, full.names = T, recursive = T)
@@ -322,7 +290,7 @@ archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
 
 
 archivos = lapply(archivos_csv, function(x) {
-  df = read.csv(x,  fileEncoding = "latin1")
+  df = read.csv(x)
   df = df |>  
     dplyr::select(cve_ent, cve_mun, cve_loc, codigo_act, per_ocu)
   df
@@ -332,13 +300,11 @@ datos = dplyr::bind_rows(archivos)
 
 ```
 
-
-
 Con todos los archivos CSV unidos en un solo data.frame llamado datos, se realizará el cálculo de la afinidad, no se explicará en detalle cómo funciona el código.
 
-
-
 ```{r afinidad_complejidad_calculo}
+#| message: false
+#| warning: false
 df = datos
 
 denue = datos
@@ -393,8 +359,6 @@ names(preparacion_afinidad)[2:ncol(preparacion_afinidad)] = paste0(names(prepara
 preparacion_afinidad |>  head()
 ```
 
-
-
 El resultado debe ser un **data.frame** con 4 columnas:
 
 -   **codigo_act**
@@ -417,9 +381,9 @@ Como es una **actualización del tablero**, necesitas tener antes los **Afinidad
 
 Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
 
-
-
 ```{r afinidad_guardar}
+#| message: false
+#| warning: false
 afinidad_previo = read.csv("Datos/Procesados/Antiguos/afinidad_6_nombres.csv")
 
 afinidad_actualizado = merge(x = afinidad_previo, y = preparacion_afinidad, by = "codigo_act", all.x = T, all.y = T)
@@ -468,8 +432,6 @@ afinidad_actualizado = afinidad_actualizado |>
 write.csv(afinidad_actualizado, "Datos/Procesados/Actualizados/afinidad_6_nombres.csv", row.names = F, fileEncoding = "UTF-8")
 ```
 
-
-
 ## Diversidad y Ubicuidad promedio.
 
 -   **Diversidad** indica el número de actividades económicas en las que está especializada cada entidad.
@@ -481,8 +443,6 @@ Las entidades **peor posicionadas** están en el **primer cuadrante** (superior 
 ![](Img/Diversidad_Ubicuidad_Vista_General.png)
 
 No se explicará en detalle cómo funciona el código.
-
-
 
 ```{r afinidad_complejidad_archivo}
 directorio = "Datos/Originales/Hidalgo/"
@@ -499,11 +459,7 @@ cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
 cat("El archivo csv tiene el nombre: ", nombres, "\n")
 ```
 
-
-
 Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
-
-
 
 ```{r Diversidad_Ubicuidad_calculo}
 #| message: false
@@ -559,8 +515,6 @@ datos_grafica = datos_grafica |>  as.data.frame()
 datos_grafica |>  head()
 ```
 
-
-
 El resultado debe ser un **data.frame** con 3 columnas:
 
 -   **CVE_MUN**
@@ -581,16 +535,12 @@ Como es una **actualización del tablero**, necesitas tener antes los **Índices
 
 Asi que adjuntaremos lo obtenido previamente ha dicho archivo.
 
-
-
 ```{r Diversidad_Ubicuidad_guardar}
 diversidad_ubicuidad_previo = read.csv("Datos/Procesados/Antiguos/dive_vs_ubi_6_mun.csv")
 diversidad_ubicuidad_actualizado = merge(x = diversidad_ubicuidad_previo, y = datos_grafica, by = "CVE_MUN")
 
 write.csv(diversidad_ubicuidad_actualizado, "Datos/Procesados/Actualizados/dive_vs_ubi_6_mun.csv", row.names = F, fileEncoding = "UTF-8")
 ```
-
-
 
 ## Red Hidalgo
 
@@ -603,8 +553,6 @@ En este apartado se crea un archivo nuevo, el cual debe tener la siguiente estru
 ![](Img/Espacio_Entidades_Datos_Previos.png)
 
 Estos archivos suelen tener por nombre **Red_Hidalgo_2024B.** No se explicará en detalle cómo funciona el código.
-
-
 
 ```{r Red_Hidalgo_archivo}
 directorio = "Datos/Originales/Hidalgo/"
@@ -621,11 +569,7 @@ cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
 cat("El archivo csv tiene el nombre: ", nombres, "\n")
 ```
 
-
-
 Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
-
-
 
 ```{r Red_Hidalgo_realizar_guardar}
 #| message: false
@@ -713,10 +657,7 @@ datos = datos |>
 
 write.csv(datos, paste0("Datos/Procesados/Actualizados/", "Red_Hidalgo_", nombres[i],".csv"), row.names = F, fileEncoding = "UTF-8")
 
-datos |>  head()
 ```
-
-
 
 ## Espacio Producto
 
@@ -729,8 +670,6 @@ En este apartado se crea un archivo nuevo, el cual debe tener la siguiente estru
 ![](Img/Grafo_Hidalgo_General.png)
 
 Estos archivos suelen tener por nombre **grafo_hgo_2024B.** No se explicará en detalle cómo funciona el código.
-
-
 
 ```{r Espacio_Producto_archivo}
 directorio = "Datos/Originales/Hidalgo/"
@@ -747,15 +686,12 @@ cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
 cat("El archivo csv tiene el nombre: ", nombres, "\n")
 ```
 
-
-
 Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
-
-
 
 ```{r Espacio_Producto_Calculo}
 #| message: false
 #| warning: false
+
 
 i = 1
 denue = read.csv(archivos_csv[i]) |> 
@@ -808,8 +744,6 @@ p |>  head()
 
 ```
 
-
-
 El resultado debe ser un **data.frame** con 5 columnas:
 
 -   **nodo1**
@@ -824,12 +758,7 @@ El resultado debe ser un **data.frame** con 5 columnas:
 
 Para el siguiente paso, necesitamos el **archivo afinidad_6_nombres.csv**, generado en el apartado de **Afinidad y Complejidad del producto**, para agregarle las demás columnas.
 
-
-
 ```{r producto_guardar}
-#| message: false
-#| warning: false
-#| 
 
 afinidad = read.csv("Datos/Procesados/Actualizados/afinidad_6_nombres.csv")
 afinidad = afinidad |> 
@@ -857,8 +786,8 @@ producto = producto |>
 
 
 write.csv(producto, paste0("Datos/Procesados/Actualizados/", "grafo_hgo_", nombres[i],".csv"), row.names = F, fileEncoding = "UTF-8")
-
-
-producto |>  head()
 ```
 
+## Balassa Modificado
+
+Pendiente en mi otra pc
