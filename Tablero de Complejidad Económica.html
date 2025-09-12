@@ -166,24 +166,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="descomprimir-archivos">Descomprimir archivos</h4>
 <p>Descomprime los archivos de <strong>Hidalgo</strong>. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>archivos_zip <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (zip_file <span class="cf">in</span> archivos_zip) {</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  nombre_carpeta <span class="ot">=</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(zip_file))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Carpeta destino </span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  destino <span class="ot">=</span> <span class="fu">file.path</span>(<span class="fu">dirname</span>(zip_file), nombre_carpeta)</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(raster)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spatstat)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(economiccomplexity)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>archivos_zip <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (zip_file <span class="cf">in</span> archivos_zip) {</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Crear carpeta si no existe</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(destino)) {</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(destino, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  nombre_carpeta <span class="ot">=</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(zip_file))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Carpeta destino </span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  destino <span class="ot">=</span> <span class="fu">file.path</span>(<span class="fu">dirname</span>(zip_file), nombre_carpeta)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraer dentro de la carpeta</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(zip_file, <span class="at">exdir =</span> destino)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Crear carpeta si no existe</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(destino)) {</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(destino, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraer dentro de la carpeta</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(zip_file, <span class="at">exdir =</span> destino)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><img src="Img/Descomprimir_Hidalgo.png" class="img-fluid"></p>
 <p>De manera analoga los archivos <strong>nivel nacional</strong>. Solo indica la carpeta donde los guardaste y cambia la línea con esa ruta.</p>
@@ -968,6 +973,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="actualización-de-actividades_complejidadgif" class="level1">
 <h1>Actualización de Actividades_ComplejidadGIF</h1>
+<p><img src="Img/Actividades_Economicas_GIF.png" class="img-fluid"></p>
+<p>Sin explicación.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pattern =</span> <span class="st">".csv"</span>, </span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">all.files =</span> T, </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">recursive =</span> T, </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">full.names =</span> T)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> archivos_csv[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"diccionario"</span>, archivos_csv)]</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>nombres <span class="ot">=</span> archivos_csv <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">basename</span>()</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv ha abrir es: "</span>, archivos_csv, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv ha abrir es:  Datos/Originales/Hidalgo/2025A/conjunto_de_datos/denue_inegi_13_.csv </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv tiene el nombre: "</span>, nombres, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv tiene el nombre:  2025A </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>i <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> <span class="fu">read.csv</span>(archivos_csv[i]) <span class="sc">|&gt;</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cve_ent <span class="sc">==</span> <span class="dv">13</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(latitud <span class="sc">!=</span> <span class="dv">0</span>, longitud <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(codigo_act,nombre_act,per_ocu,cve_mun,cve_loc,latitud,longitud) <span class="sc">|&gt;</span> </span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">rama =</span> <span class="fu">substr</span>(<span class="at">x =</span> codigo_act, <span class="at">start =</span> <span class="dv">1</span>, <span class="at">stop =</span> <span class="dv">4</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">per_ocu =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"0 a 5 personas"</span> <span class="sc">~</span> <span class="st">"2.5"</span>,</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"6 a 10 personas"</span> <span class="sc">~</span> <span class="st">"8"</span>,</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"11 a 30 personas"</span> <span class="sc">~</span> <span class="st">"20.5"</span>,</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"31 a 50 personas"</span> <span class="sc">~</span> <span class="st">"40.5"</span>,</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"51 a 100 personas"</span> <span class="sc">~</span> <span class="st">"75.5"</span>,</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"101 a 250 personas"</span> <span class="sc">~</span> <span class="st">"175.5"</span>,</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"251 y más personas"</span>, <span class="st">"251 y m</span><span class="sc">\xe1</span><span class="st">s personas"</span>) <span class="sc">~</span> <span class="st">"251"</span>,</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> per_ocu  </span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">per_ocu =</span> <span class="fu">as.numeric</span>(per_ocu)</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>classificador_hoja <span class="ot">=</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"Datos/Clasificacion ramas de DENUE.xlsx"</span>)</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>classificador_hoja <span class="ot">=</span> classificador_hoja <span class="sc">|&gt;</span> </span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">grupo =</span> <span class="st">`</span><span class="at">Grupo propuesto</span><span class="st">`</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">grupo =</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"[0-9]+"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="at">x =</span> grupo),</span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>                <span class="at">grupo =</span> stringr<span class="sc">::</span><span class="fu">str_squish</span>(grupo)) </span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>denue_prueba_shp <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> denue, <span class="at">y =</span> classificador_hoja, <span class="at">by.x =</span> <span class="st">'rama'</span>, <span class="at">by.y =</span> <span class="st">'Rama'</span>, <span class="at">all.x =</span> T )</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>shapefile  <span class="ot">=</span> sf<span class="sc">::</span><span class="fu">st_as_sf</span>(denue_prueba_shp, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitud"</span>, <span class="st">"latitud"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>base <span class="ot">=</span> raster<span class="sc">::</span><span class="fu">raster</span>(<span class="st">"Datos/Procesados/Antiguos/Raster/pendiente.tif"</span>)<span class="sc">*</span><span class="dv">0</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">=</span> sf<span class="sc">::</span><span class="fu">st_bbox</span>(base)</span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a>window <span class="ot">=</span> spatstat.geom<span class="sc">::</span><span class="fu">owin</span>(<span class="at">xrange =</span> <span class="fu">c</span>(bbox[<span class="dv">1</span>], bbox[<span class="dv">3</span>]), <span class="at">yrange =</span> <span class="fu">c</span>(bbox[<span class="dv">2</span>], bbox[<span class="dv">4</span>]))</span>
+<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a>grupos <span class="ot">=</span> <span class="fu">unique</span>(denue_prueba_shp<span class="sc">$</span>grupo)</span>
+<span id="cb46-34"><a href="#cb46-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-35"><a href="#cb46-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-36"><a href="#cb46-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-37"><a href="#cb46-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-38"><a href="#cb46-38" aria-hidden="true" tabindex="-1"></a><span class="do">### Creacion de carpeta</span></span>
+<span id="cb46-39"><a href="#cb46-39" aria-hidden="true" tabindex="-1"></a>destino_guardado <span class="ot">=</span> <span class="fu">file.path</span>(<span class="st">"Datos/Procesados/Actualizados"</span>, nombres[i])</span>
+<span id="cb46-40"><a href="#cb46-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-41"><a href="#cb46-41" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(destino_guardado)) {</span>
+<span id="cb46-42"><a href="#cb46-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(destino_guardado, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-43"><a href="#cb46-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-44"><a href="#cb46-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-45"><a href="#cb46-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-47"><a href="#cb46-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(grupo_I <span class="cf">in</span> grupos){</span>
+<span id="cb46-48"><a href="#cb46-48" aria-hidden="true" tabindex="-1"></a>  shapefile_grupo <span class="ot">=</span> shapefile <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(grupo <span class="sc">==</span> grupo_I)</span>
+<span id="cb46-49"><a href="#cb46-49" aria-hidden="true" tabindex="-1"></a>  coords <span class="ot">=</span> sf<span class="sc">::</span><span class="fu">st_coordinates</span>(shapefile_grupo<span class="sc">|&gt;</span> sf<span class="sc">::</span><span class="fu">st_transform</span>(<span class="fu">crs</span>(base)))    <span class="co"># Extraer las coordenadas de los puntos</span></span>
+<span id="cb46-50"><a href="#cb46-50" aria-hidden="true" tabindex="-1"></a>  puntos_ppp <span class="ot">=</span> spatstat.geom<span class="sc">::</span><span class="fu">ppp</span>(<span class="at">x =</span> coords[<span class="fu">inside.owin</span>(<span class="at">x =</span> coords[, <span class="dv">1</span>], <span class="at">y =</span> coords[, <span class="dv">2</span>], window), <span class="dv">1</span>], <span class="at">y =</span> coords[<span class="fu">inside.owin</span>(<span class="at">x =</span> coords[, <span class="dv">1</span>], <span class="at">y =</span> coords[, <span class="dv">2</span>], window), <span class="dv">2</span>], <span class="at">window =</span> window)   <span class="do">## Convertir los puntos a un objeto ppp</span></span>
+<span id="cb46-51"><a href="#cb46-51" aria-hidden="true" tabindex="-1"></a>  pesos <span class="ot">=</span> shapefile_grupo<span class="sc">$</span>per_ocu_media[<span class="fu">inside.owin</span>(<span class="at">x =</span> coords[, <span class="dv">1</span>], <span class="at">y =</span> coords[, <span class="dv">2</span>], window)]</span>
+<span id="cb46-52"><a href="#cb46-52" aria-hidden="true" tabindex="-1"></a>  dens <span class="ot">=</span> spatstat.explore<span class="sc">::</span><span class="fu">density.ppp</span>(puntos_ppp,<span class="at">sigma=</span><span class="fu">c</span>(<span class="dv">2000</span>,<span class="dv">2000</span>),<span class="at">dimyx=</span><span class="fu">c</span>(<span class="dv">998</span>,<span class="dv">978</span>),<span class="at">weights =</span><span class="fl">1e6</span><span class="sc">*</span><span class="dv">100</span><span class="sc">*</span><span class="fu">unlist</span>(pesos, <span class="at">use.names =</span> F)<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">unlist</span>(pesos, <span class="at">use.names =</span> F))) <span class="sc">|&gt;</span> <span class="fu">raster</span>()</span>
+<span id="cb46-53"><a href="#cb46-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crs</span>(dens) <span class="ot">=</span> <span class="fu">crs</span>(base)</span>
+<span id="cb46-54"><a href="#cb46-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extent</span>(dens) <span class="ot">=</span> <span class="fu">extent</span>(base)</span>
+<span id="cb46-55"><a href="#cb46-55" aria-hidden="true" tabindex="-1"></a>  dens <span class="ot">=</span> dens<span class="sc">*</span>(base<span class="sc">+</span><span class="dv">1</span>)</span>
+<span id="cb46-56"><a href="#cb46-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">writeRaster</span>(dens,<span class="fu">file.path</span>(destino_guardado, <span class="fu">paste0</span>(grupo_I,<span class="st">".tiff"</span>)), <span class="at">overwrite =</span> T)</span>
+<span id="cb46-57"><a href="#cb46-57" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 
 </main>
