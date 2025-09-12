@@ -867,8 +867,107 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="balassa-modificado" class="level2">
 <h2 class="anchored" data-anchor-id="balassa-modificado">Balassa Modificado</h2>
-<p>Pendiente en mi otra pc</p>
+<p>Para este apartado se necesita el archivo <strong>Clasificación ramas de DENUE.xlsx</strong>.</p>
+<p><img src="Img/Clasificacion_ramas_DENUE.png" class="img-fluid"></p>
+<p>No se dará una explicación detallada del código.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>directorio <span class="ot">=</span> <span class="st">"Datos/Originales/Hidalgo/"</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> directorio, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pattern =</span> <span class="st">".csv"</span>, </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">all.files =</span> T, </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">recursive =</span> T, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">full.names =</span> T)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>archivos_csv <span class="ot">=</span> archivos_csv[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"diccionario"</span>, archivos_csv)]</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>nombres <span class="ot">=</span> archivos_csv <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">dirname</span>() <span class="sc">|&gt;</span>  <span class="fu">basename</span>()</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv ha abrir es: "</span>, archivos_csv, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv ha abrir es:  Datos/Originales/Hidalgo/2025A/conjunto_de_datos/denue_inegi_13_.csv </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El archivo csv tiene el nombre: "</span>, nombres, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El archivo csv tiene el nombre:  2025A </code></pre>
+</div>
+</div>
+<p>Unicamente verifica que este abriendo el archivo <strong>denue_inegi_13_.csv</strong> y que el nombre del archivo sea con el correspondiente que renombraste.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>i <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> <span class="fu">read.csv</span>(archivos_csv[i]) <span class="sc">|&gt;</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cve_ent <span class="sc">==</span> <span class="dv">13</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="do">### ICE Personal </span><span class="al">###</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="do">####################</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> denue  <span class="sc">|&gt;</span> </span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">rama =</span> <span class="fu">substr</span>(<span class="at">x =</span> codigo_act, <span class="at">start =</span> <span class="dv">1</span>, <span class="at">stop =</span> <span class="dv">4</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">per_ocu =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"0 a 5 personas"</span> <span class="sc">~</span> <span class="st">"2.5"</span>,</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"6 a 10 personas"</span> <span class="sc">~</span> <span class="st">"8"</span>,</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"11 a 30 personas"</span> <span class="sc">~</span> <span class="st">"20.5"</span>,</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"31 a 50 personas"</span> <span class="sc">~</span> <span class="st">"40.5"</span>,</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"51 a 100 personas"</span> <span class="sc">~</span> <span class="st">"75.5"</span>,</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">==</span> <span class="st">"101 a 250 personas"</span> <span class="sc">~</span> <span class="st">"175.5"</span>,</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    per_ocu <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"251 y más personas"</span>, <span class="st">"251 y m</span><span class="sc">\xe1</span><span class="st">s personas"</span>) <span class="sc">~</span> <span class="st">"251"</span>,</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> per_ocu  </span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">per_ocu =</span> <span class="fu">as.numeric</span>(per_ocu)</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>classificador_hoja <span class="ot">=</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"Datos/Clasificacion ramas de DENUE.xlsx"</span>)</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>classificador_hoja <span class="ot">=</span> classificador_hoja <span class="sc">|&gt;</span> </span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">grupo =</span> <span class="st">`</span><span class="at">Grupo propuesto</span><span class="st">`</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">grupo =</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"[0-9]+"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="at">x =</span> grupo),</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>                <span class="at">grupo =</span> stringr<span class="sc">::</span><span class="fu">str_squish</span>(grupo)) </span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>denue <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> denue, <span class="at">y =</span> classificador_hoja <span class="sc">|&gt;</span>dplyr<span class="sc">::</span><span class="fu">select</span>(Rama,grupo), <span class="at">by.x =</span> <span class="st">'rama'</span>, <span class="at">by.y =</span> <span class="st">'Rama'</span>, <span class="at">all.x =</span> T)</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>denue_por_mun <span class="ot">=</span> denue<span class="sc">|&gt;</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cve_mun,grupo)<span class="sc">|&gt;</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">personal =</span> <span class="fu">sum</span>(per_ocu))</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>bi <span class="ot">=</span> economiccomplexity<span class="sc">::</span><span class="fu">balassa_index</span>(<span class="at">trade_data =</span> denue_por_mun, <span class="at">discrete =</span> F, <span class="at">country =</span> <span class="st">"cve_mun"</span>, <span class="at">product =</span> <span class="st">"grupo"</span>, <span class="at">value =</span> <span class="st">"personal"</span>)</span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>pre_biM0 <span class="ot">=</span> denue_por_mun <span class="sc">|&gt;</span></span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> grupo,<span class="at">values_from =</span> personal)</span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>pre_biM <span class="ot">=</span> denue_por_mun <span class="sc">|&gt;</span></span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> grupo,<span class="at">values_from =</span> personal)<span class="sc">|&gt;</span></span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()<span class="sc">|&gt;</span></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>cve_mun)</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>bi_raw<span class="ot">=</span>pre_biM<span class="sc">|&gt;</span><span class="fu">as.matrix</span>()</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a>bi_raw<span class="ot">=</span><span class="fu">sum</span>(bi_raw,<span class="at">na.rm =</span> T)<span class="sc">*</span><span class="fu">t</span>(<span class="fu">t</span>(bi_raw<span class="sc">/</span><span class="fu">rowSums</span>(bi_raw,<span class="at">na.rm=</span>T))<span class="sc">/</span><span class="fu">colSums</span>(bi_raw,<span class="at">na.rm=</span>T))</span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a>bi_raw_mod<span class="ot">=</span><span class="fu">t</span>(<span class="fu">t</span>(bi_raw<span class="sc">**</span><span class="dv">2</span><span class="sc">/</span><span class="fu">rowSums</span>(bi_raw,<span class="at">na.rm=</span>T))<span class="sc">/</span><span class="fu">colSums</span>(bi_raw,<span class="at">na.rm=</span>T))<span class="sc">*</span><span class="fl">1e4</span></span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>bi_mod<span class="ot">=</span>bi_raw_mod<span class="sc">|&gt;</span><span class="fu">as.data.frame</span>()</span>
+<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a>bi_mod<span class="sc">$</span>cve_mun<span class="ot">=</span>pre_biM0<span class="sc">$</span>cve_mun</span>
+<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a>bi_mod<span class="ot">=</span>bi_mod[,<span class="fu">c</span>(<span class="fu">ncol</span>(bi_mod),<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(bi_mod) <span class="sc">-</span> <span class="dv">1</span>))]</span>
+<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a>municipios <span class="ot">=</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"Datos/Banco de datos infografias _Eduardo.xlsx"</span>)</span>
+<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>municipios <span class="ot">=</span> municipios <span class="sc">|&gt;</span> </span>
+<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Región)) </span>
+<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a>municipios <span class="ot">=</span> municipios <span class="sc">|&gt;</span> </span>
+<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Municipio) <span class="sc">|&gt;</span> </span>
+<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">CVE_MUN =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(municipios)) </span>
+<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a>bi_mod2 <span class="ot">=</span> <span class="fu">merge</span>(<span class="at">x =</span> bi_mod, <span class="at">y =</span> municipios, <span class="at">by.x =</span> <span class="st">'cve_mun'</span>, <span class="at">by.y=</span><span class="st">'CVE_MUN'</span>)</span>
+<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>bi_mod2 <span class="ot">=</span> bi_mod2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">cve_mun=</span><span class="fu">sprintf</span>(<span class="st">"%03d"</span>,cve_mun))</span>
+<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a>bi_mod2 <span class="ot">=</span> bi_mod2[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="fu">ncol</span>(bi_mod2),<span class="dv">2</span><span class="sc">:</span>(<span class="fu">ncol</span>(bi_mod2) <span class="sc">-</span> <span class="dv">1</span>))]</span>
+<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a>bi_mod2 <span class="ot">=</span> bi_mod2 <span class="sc">|&gt;</span> </span>
+<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">NOM_MUN =</span> Municipio)</span>
+<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(bi_mod2, <span class="fu">file.path</span>(<span class="st">"Datos/Procesados/Actualizados/"</span>, <span class="fu">paste0</span>(<span class="st">"Balassa_Mod_Nivel_Municipio_por_Grupos_"</span>, nombres[i], <span class="st">".csv"</span>)), <span class="at">fileEncoding =</span> <span class="st">"UTF-8"</span>, <span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
+</section>
+<section id="actualización-de-actividades_complejidadgif" class="level1">
+<h1>Actualización de Actividades_ComplejidadGIF</h1>
 </section>
 
 </main>

@@ -790,4 +790,104 @@ write.csv(producto, paste0("Datos/Procesados/Actualizados/", "grafo_hgo_", nombr
 
 ## Balassa Modificado
 
-Pendiente en mi otra pc
+Para este apartado se necesita el archivo **Clasificación ramas de DENUE.xlsx**.
+
+![](Img/Clasificacion_ramas_DENUE.png)
+
+No se dará una explicación detallada del código.
+
+```{r balassa_modificado_abrir}
+directorio = "Datos/Originales/Hidalgo/"
+archivos_csv = list.files(path = directorio, 
+                          pattern = ".csv", 
+                          all.files = T, 
+                          recursive = T, 
+                          full.names = T)
+
+archivos_csv = archivos_csv[!grepl("diccionario", archivos_csv)]
+nombres = archivos_csv |>  dirname() |>  dirname() |>  basename()
+
+cat("El archivo csv ha abrir es: ", archivos_csv, "\n")
+cat("El archivo csv tiene el nombre: ", nombres, "\n")
+```
+
+Unicamente verifica que este abriendo el archivo **denue_inegi_13\_.csv** y que el nombre del archivo sea con el correspondiente que renombraste.
+
+```{r balassa_modificado_realizar}
+#| message: false
+#| warning: false
+i = 1
+denue = read.csv(archivos_csv[i]) |> 
+  dplyr::filter(cve_ent == 13)
+
+####################
+### ICE Personal ###
+####################
+
+denue = denue  |> 
+  dplyr::mutate(rama = substr(x = codigo_act, start = 1, stop = 4)) |> 
+  dplyr::mutate(per_ocu = dplyr::case_when(
+    per_ocu == "0 a 5 personas" ~ "2.5",
+    per_ocu == "6 a 10 personas" ~ "8",
+    per_ocu == "11 a 30 personas" ~ "20.5",
+    per_ocu == "31 a 50 personas" ~ "40.5",
+    per_ocu == "51 a 100 personas" ~ "75.5",
+    per_ocu == "101 a 250 personas" ~ "175.5",
+    per_ocu %in% c("251 y más personas", "251 y m\xe1s personas") ~ "251",
+    TRUE ~ per_ocu  
+  ),
+  per_ocu = as.numeric(per_ocu)
+  )
+
+
+classificador_hoja = readxl::read_excel("Datos/Clasificacion ramas de DENUE.xlsx")
+classificador_hoja = classificador_hoja |> 
+  dplyr::rename(grupo = `Grupo propuesto`) |> 
+  dplyr::mutate(grupo = gsub(pattern = "[0-9]+", replacement = "", x = grupo),
+                grupo = stringr::str_squish(grupo)) 
+
+denue = merge(x = denue, y = classificador_hoja |>dplyr::select(Rama,grupo), by.x = 'rama', by.y = 'Rama', all.x = T)
+
+denue_por_mun = denue|>
+  dplyr::group_by(cve_mun,grupo)|>
+  dplyr::summarise(personal = sum(per_ocu))
+
+bi = economiccomplexity::balassa_index(trade_data = denue_por_mun, discrete = F, country = "cve_mun", product = "grupo", value = "personal")
+
+pre_biM0 = denue_por_mun |>
+  tidyr::pivot_wider(names_from = grupo,values_from = personal)
+
+pre_biM = denue_por_mun |>
+  tidyr::pivot_wider(names_from = grupo,values_from = personal)|>
+  dplyr::ungroup()|>
+  dplyr::select(-cve_mun)
+
+bi_raw=pre_biM|>as.matrix()
+bi_raw=sum(bi_raw,na.rm = T)*t(t(bi_raw/rowSums(bi_raw,na.rm=T))/colSums(bi_raw,na.rm=T))
+
+bi_raw_mod=t(t(bi_raw**2/rowSums(bi_raw,na.rm=T))/colSums(bi_raw,na.rm=T))*1e4
+bi_mod=bi_raw_mod|>as.data.frame()
+bi_mod$cve_mun=pre_biM0$cve_mun
+
+bi_mod=bi_mod[,c(ncol(bi_mod),1:(ncol(bi_mod) - 1))]
+
+
+municipios = readxl::read_excel("Datos/Banco de datos infografias _Eduardo.xlsx")
+municipios = municipios |> 
+  dplyr::filter(!is.na(Región)) 
+
+municipios = municipios |> 
+  dplyr::select(Municipio) |> 
+  dplyr::mutate(CVE_MUN = 1:nrow(municipios)) 
+
+bi_mod2 = merge(x = bi_mod, y = municipios, by.x = 'cve_mun', by.y='CVE_MUN')
+bi_mod2 = bi_mod2 |> dplyr::mutate(cve_mun=sprintf("%03d",cve_mun))
+bi_mod2 = bi_mod2[,c(1,ncol(bi_mod2),2:(ncol(bi_mod2) - 1))]
+bi_mod2 = bi_mod2 |> 
+  dplyr::rename(NOM_MUN = Municipio)
+
+write.csv(bi_mod2, file.path("Datos/Procesados/Actualizados/", paste0("Balassa_Mod_Nivel_Municipio_por_Grupos_", nombres[i], ".csv")), fileEncoding = "UTF-8", row.names = F)
+```
+
+
+# Actualización de Actividades_ComplejidadGIF
