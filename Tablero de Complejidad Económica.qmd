@@ -3,6 +3,7 @@ title: "Documentación Tablero de Complejidad Económica"
 author: "Eduardo Alanis Garcia"
 format: html
 editor: visual
+jupyter: python3
 ---
 
 # Actualización del Tablero
@@ -902,6 +903,8 @@ write.csv(bi_mod2, file.path("Datos/Procesados/Actualizados/", paste0("Balassa_M
 
 Sin explicación.
 
+## Creación de Rasters
+
 ```{r actividad_complejidad_GIF}
 #| message: false
 #| warning: false
@@ -980,5 +983,28 @@ for(grupo_I in grupos){
   dens = dens*(base+1)
   writeRaster(dens,file.path(destino_guardado, paste0(grupo_I,".tiff")), overwrite = T)
 }
+
+```
+
+## Rasters a Imagenes en Python
+
+```{python}
+import rasterio
+from rasterio.enums import Resampling
+
+with rasterio.open('Datos/Procesados/Antiguos/Raster/Agencias de cobranza y comunicaciones.tiff') as src:
+    data = src.read(
+        out_shape=(src.count, src.height, src.width),
+        resampling=Resampling.nearest
+    )
+
+    transform = src.transform
+
+```
+
+
+
+```{python}
+import os
 
 ```
