@@ -985,6 +985,7 @@ for(grupo_I in grupos){
   raster::crs(dens) = raster::crs(base)
   raster::extent(dens) = raster::extent(base)
   dens = dens*(base+1)
+  dens = ((dens - raster::minValue(x = dens))/(raster::maxValue(dens) - raster::minValue(x = dens)))*0.4
   writeRaster(dens,file.path(destino_guardado, paste0(grupo_I,".tiff")), overwrite = T)
 }
 ```
